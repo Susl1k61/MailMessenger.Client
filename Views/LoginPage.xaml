@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MailMessenger.Client.Views.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="{StaticResource AppBackground}"
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView BackgroundColor="{StaticResource AppBackground}">
+        <Grid RowDefinitions="*,Auto,*" MinimumHeightRequest="680">
+            <BoxView Grid.Row="0" BackgroundColor="Transparent" />
+
+            <VerticalStackLayout Grid.Row="1" Padding="28,0" Spacing="24">
+
+                <!-- Logo area -->
+                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Border
+                        BackgroundColor="{StaticResource ContactRowActive}"
+                        HeightRequest="76" WidthRequest="76"
+                        HorizontalOptions="Center"
+                        StrokeShape="RoundRectangle 20"
+                        Stroke="{StaticResource Divider}"
+                        StrokeThickness="1">
+                        <Label Text="💬" FontSize="38"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <Label
+                        Text="MailMessenger"
+                        FontSize="24" FontAttributes="Bold"
+                        TextColor="{StaticResource TextPrimary}"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="Sign in with your Yandex Mail"
+                        FontSize="13"
+                        TextColor="{StaticResource TextMuted}"
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <!-- Form card — bg-[#0D0D0D] border border-white/5 rounded-2xl -->
+                <Border
+                    BackgroundColor="{StaticResource PanelBackground}"
+                    Padding="20,20"
+                    Stroke="{StaticResource Divider}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 20">
+                    <VerticalStackLayout Spacing="16">
+
+                        <!-- Email -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Email"
+                                   FontSize="12" FontAttributes="Bold"
+                                   TextColor="{StaticResource AccentPurple}" />
+                            <Border
+                                BackgroundColor="{StaticResource SurfaceInput}"
+                                Padding="14,0"
+                                Stroke="{StaticResource Divider}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 12"
+                                HeightRequest="50">
+                                <Entry
+                                    BackgroundColor="Transparent"
+                                    Keyboard="Email"
+                                    Placeholder="you@yandex.ru"
+                                    PlaceholderColor="{StaticResource TextMuted}"
+                                    Text="{Binding Email}"
+                                    TextColor="{StaticResource TextPrimary}"
+                                    FontSize="14" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Password -->
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="App password"
+                                   FontSize="12" FontAttributes="Bold"
+                                   TextColor="{StaticResource AccentPurple}" />
+                            <Border
+                                BackgroundColor="{StaticResource SurfaceInput}"
+                                Padding="14,0"
+                                Stroke="{StaticResource Divider}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 12"
+                                HeightRequest="50">
+                                <Entry
+                                    BackgroundColor="Transparent"
+                                    IsPassword="True"
+                                    Placeholder="Yandex app password"
+                                    PlaceholderColor="{StaticResource TextMuted}"
+                                    Text="{Binding AppPassword}"
+                                    TextColor="{StaticResource TextPrimary}"
+                                    FontSize="14" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <!-- Help hint -->
+                        <Border
+                            BackgroundColor="#0D0D14"
+                            Padding="12,10"
+                            Stroke="{StaticResource Divider}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10">
+                            <Label
+                                FontSize="12"
+                                LineBreakMode="WordWrap"
+                                Text="{Binding AppPasswordHelpText}"
+                                TextColor="{StaticResource TextMuted}" />
+                        </Border>
+
+                        <!-- Error -->
+                        <Label
+                            IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}"
+                            FontSize="13"
+                            LineBreakMode="WordWrap"
+                            Text="{Binding ErrorMessage}"
+                            TextColor="{StaticResource ErrorRed}" />
+
+                        <!-- Sign in button — gradient bg-purple-600 rounded-xl -->
+                        <Border
+                            BackgroundColor="{StaticResource AccentPurple}"
+                            StrokeShape="RoundRectangle 14"
+                            Stroke="Transparent"
+                            HeightRequest="52">
+                            <Button
+                                BackgroundColor="Transparent"
+                                Command="{Binding LoginCommand}"
+                                FontAttributes="Bold"
+                                FontSize="16"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+                                Text="Sign in"
+                                TextColor="White"
+                                HeightRequest="52"
+                                CornerRadius="14" />
+                        </Border>
+
+                        <ActivityIndicator
+                            HorizontalOptions="Center"
+                            IsRunning="{Binding IsBusy}"
+                            IsVisible="{Binding IsBusy}"
+                            Color="{StaticResource AccentPurple}"
+                            HeightRequest="28" WidthRequest="28" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label
+                    FontSize="11"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    Opacity="0.35"
+                    Text="Uses Yandex IMAP/SMTP · your data stays on-device"
+                    TextColor="{StaticResource TextMuted}" />
+            </VerticalStackLayout>
+
+            <BoxView Grid.Row="2" BackgroundColor="Transparent" />
+        </Grid>
+    </ScrollView>
+</ContentPage>

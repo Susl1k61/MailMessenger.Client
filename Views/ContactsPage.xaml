@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  ContactsPage — pixel-perfect replica of Sidebar.tsx from agon-agent.
+  bg-[#0D0D0D]  border-r border-white/5  flex flex-col h-full
+-->
+<ContentPage
+    x:Class="MailMessenger.Client.Views.ContactsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:MailMessenger.Client.Behaviors"
+    xmlns:models="clr-namespace:MailMessenger.Client.Models"
+    BackgroundColor="{StaticResource PanelBackground}"
+    Shell.NavBarIsVisible="False">
+
+    <AbsoluteLayout>
+
+        <!-- ── Full sidebar grid ─────────────────────────────────── -->
+        <Grid
+            AbsoluteLayout.LayoutBounds="0,0,1,1"
+            AbsoluteLayout.LayoutFlags="All"
+            RowDefinitions="Auto,Auto,*,Auto"
+            BackgroundColor="{StaticResource PanelBackground}">
+
+            <!-- Right border:  border-r border-white/5 -->
+            <BoxView
+                Grid.Row="0" Grid.RowSpan="4"
+                HorizontalOptions="End"
+                WidthRequest="1"
+                BackgroundColor="{StaticResource Divider}"
+                InputTransparent="True"
+                ZIndex="10" />
+
+            <!-- ══ HEADER  px-4 py-4 flex items-center justify-between ══ -->
+            <Grid
+                Grid.Row="0"
+                ColumnDefinitions="*,Auto"
+                Padding="16,16,16,16">
+
+                <!-- Left: hamburger + "Messages" -->
+                <HorizontalStackLayout Grid.Column="0" Spacing="12" VerticalOptions="Center">
+                    <!-- p-2 rounded-xl text-gray-400 hover:text-purple-400 hover:bg-white/5 -->
+                    <Border
+                        BackgroundColor="Transparent"
+                        HeightRequest="36" WidthRequest="36"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="Transparent">
+                        <Label
+                            Text="≡" FontSize="20"
+                            FontFamily="Inter"
+                            TextColor="{StaticResource TextSecondary}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                    <!-- text-lg font-bold text-white tracking-tight -->
+                    <Label
+                        Text="Messages"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource TextPrimary}"
+                        VerticalOptions="Center" />
+                </HorizontalStackLayout>
+
+                <!-- Right: compose  p-2 rounded-xl bg-purple-600/20 text-purple-400 -->
+                <Border
+                    Grid.Column="1"
+                    BackgroundColor="{StaticResource ContactRowActive}"
+                    HeightRequest="34" WidthRequest="34"
+                    StrokeShape="RoundRectangle 12"
+                    Stroke="Transparent">
+                    <Button
+                        BackgroundColor="Transparent"
+                        Command="{Binding AddContactCommand}"
+                        Text="✏"
+                        FontSize="15"
+                        TextColor="{StaticResource AccentPurple}"
+                        HeightRequest="34" WidthRequest="34"
+                        CornerRadius="12" Padding="0" />
+                </Border>
+            </Grid>
+
+            <!-- ══ SEARCH  px-4 pb-3 ══ -->
+            <!--
+              bg-[#1A1A2E] text-white placeholder-gray-500
+              rounded-xl pl-10 pr-4 py-2.5 text-sm
+              border border-white/5
+            -->
+            <Grid Grid.Row="1" Padding="16,0,16,12">
+                <Border
+                    BackgroundColor="{StaticResource SurfaceInput}"
+                    Padding="10,0,16,0"
+                    Stroke="{StaticResource Divider}"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 12"
+                    HeightRequest="44">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                        <!-- search icon  text-gray-500 absolute left-3 -->
+                        <Label
+                            Grid.Column="0"
+                            Text="🔍"
+                            FontSize="14"
+                            TextColor="{StaticResource TextMuted}"
+                            VerticalOptions="Center"
+                            Opacity="0.8" />
+                        <Entry
+                            Grid.Column="1"
+                            BackgroundColor="Transparent"
+                            PlaceholderColor="{StaticResource TextMuted}"
+                            TextColor="{StaticResource TextPrimary}"
+                            Placeholder="Search conversations..."
+                            Text="{Binding SearchText}"
+                            FontSize="14" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ══ CHAT LIST  flex-1 overflow-y-auto px-2 pb-2 space-y-0.5 ══ -->
+            <RefreshView
+                Grid.Row="2"
+                Command="{Binding LoadContactsCommand}"
+                IsRefreshing="{Binding IsRefreshing}"
+                RefreshColor="{StaticResource AccentPurple}">
+                <CollectionView
+                    ItemsSource="{Binding FilteredContacts}"
+                    SelectedItem="{Binding SelectedContact}"
+                    SelectionMode="Single"
+                    Margin="8,0,8,8"
+                    VerticalScrollBarVisibility="Never">
+
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout
+                            Spacing="12" Padding="40"
+                            VerticalOptions="Center" HorizontalOptions="Center">
+                            <Border
+                                BackgroundColor="{StaticResource ContactRowActive}"
+                                HeightRequest="72" WidthRequest="72"
+                                HorizontalOptions="Center"
+                                StrokeShape="RoundRectangle 36"
+                                Stroke="Transparent">
+                                <Label Text="💬" FontSize="34"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Border>
+                            <Label Text="No conversations yet"
+                                   FontSize="15" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Tap ✏ to add a contact"
+                                   FontSize="13"
+                                   TextColor="{StaticResource TextMuted}"
+                                   HorizontalOptions="Center" />
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:Contact">
+                            <SwipeView>
+                                <SwipeView.LeftItems>
+                                    <SwipeItems Mode="Execute">
+                                        <SwipeItem
+                                            BackgroundColor="{StaticResource AccentPurple}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.PickContactAvatarCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Text="Avatar" />
+                                        <SwipeItem
+                                            BackgroundColor="{StaticResource AccentViolet}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.TogglePinCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Text="📌 Pin" />
+                                    </SwipeItems>
+                                </SwipeView.LeftItems>
+                                <SwipeView.RightItems>
+                                    <SwipeItems Mode="Execute">
+                                        <SwipeItem
+                                            BackgroundColor="{StaticResource ErrorRed}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteChatCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Text="Delete" />
+                                    </SwipeItems>
+                                </SwipeView.RightItems>
+
+                                <!--
+                                  ChatListItem:
+                                  w-full flex items-center gap-3 px-4 py-3 rounded-xl
+                                  active: bg-purple-600/20 border border-purple-500/30
+                                  hover:  hover:bg-white/5 border border-transparent
+                                -->
+                                <Grid
+                                    ColumnDefinitions="Auto,*"
+                                    ColumnSpacing="12"
+                                    Padding="16,12,16,12"
+                                    Margin="0,1,0,1">
+
+                                    <!-- Avatar  w-12 h-12 rounded-full -->
+                                    <Grid
+                                        Grid.Column="0"
+                                        HeightRequest="48" WidthRequest="48">
+                                        <!-- Gradient circle -->
+                                        <Border
+                                            HeightRequest="48" WidthRequest="48"
+                                            StrokeShape="RoundRectangle 24"
+                                            Stroke="Transparent"
+                                            BackgroundColor="{Binding Email, Converter={StaticResource EmailToAvatarColorConverter}}">
+                                            <Grid>
+                                                <Image
+                                                    Aspect="AspectFill"
+                                                    HeightRequest="48" WidthRequest="48"
+                                                    IsVisible="{Binding AvatarPath, Converter={StaticResource StringNotNullOrEmptyConverter}}"
+                                                    Source="{Binding AvatarPath}" />
+                                                <!-- initials / emoji  font-semibold tracking-wide -->
+                                                <Label
+                                                    FontAttributes="Bold"
+                                                    FontSize="14"
+                                                    HorizontalOptions="Center"
+                                                    IsVisible="{Binding AvatarPath, Converter={StaticResource StringIsNullOrEmptyConverter}}"
+                                                    Text="{Binding Nickname, Converter={StaticResource FirstLetterConverter}}"
+                                                    TextColor="White"
+                                                    VerticalOptions="Center" />
+                                            </Grid>
+                                        </Border>
+
+                                        <!-- Online dot
+                                             w-3.5 h-3.5 rounded-full border-2 border-[#0D0D0D]
+                                             online: bg-emerald-400  offline: bg-gray-500 -->
+                                        <Ellipse
+                                            Fill="{StaticResource OnlineGreen}"
+                                            HeightRequest="14" WidthRequest="14"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="End"
+                                            Stroke="{StaticResource PanelBackground}"
+                                            StrokeThickness="2" />
+
+                                        <!-- Unread badge  bg-purple-600 text-white text-[10px] font-bold
+                                             rounded-full min-w-[20px] h-5 px-1.5 -->
+                                        <Border
+                                            BackgroundColor="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.BadgeTheme, Converter={StaticResource BadgeThemeToColorConverter}}"
+                                            IsVisible="{Binding UnreadCount, Converter={StaticResource UnreadCountToVisibleConverter}}"
+                                            HeightRequest="20"
+                                            MinimumWidthRequest="20"
+                                            Padding="5,0"
+                                            StrokeShape="RoundRectangle 10"
+                                            Stroke="Transparent"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="Start"
+                                            Margin="0,-4,-4,0">
+                                            <Label
+                                                FontAttributes="Bold" FontSize="10"
+                                                Text="{Binding UnreadCount, Converter={StaticResource UnreadCountToTextConverter}}"
+                                                TextColor="White"
+                                                HorizontalOptions="Center"
+                                                VerticalOptions="Center" />
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Right content  flex-1 min-w-0 text-left -->
+                                    <Grid
+                                        Grid.Column="1"
+                                        RowDefinitions="Auto,Auto"
+                                        RowSpacing="2"
+                                        VerticalOptions="Center">
+
+                                        <!-- Row 1: name + time -->
+                                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                                            <!-- font-semibold text-sm truncate
+                                                 active → text-purple-200  else → text-white -->
+                                            <Label
+                                                Grid.Column="0"
+                                                FontAttributes="Bold"
+                                                FontSize="14"
+                                                LineBreakMode="TailTruncation"
+                                                Text="{Binding Nickname}"
+                                                TextColor="{StaticResource TextPrimary}" />
+                                            <!-- text-[11px] text-gray-500 flex-shrink-0 ml-2 -->
+                                            <Label
+                                                Grid.Column="1"
+                                                FontSize="11"
+                                                Margin="8,0,0,0"
+                                                Text="{Binding LastMessageAt, Converter={StaticResource DateTimeToChatListTimeConverter}}"
+                                                TextColor="{StaticResource TextMuted}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+
+                                        <!-- Row 2: preview + unread count -->
+                                        <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+                                            <!-- text-xs text-gray-400 truncate pr-2 -->
+                                            <Label
+                                                Grid.Column="0"
+                                                FontSize="12"
+                                                LineBreakMode="TailTruncation"
+                                                Text="{Binding LastMessage}"
+                                                TextColor="{StaticResource TextSecondary}" />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </SwipeView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+
+            <!-- ══ FOOTER  px-4 py-3 border-t border-white/5 ══ -->
+            <Grid
+                Grid.Row="3"
+                ColumnDefinitions="*,Auto"
+                Padding="16,12,12,32">
+
+                <!-- top border -->
+                <BoxView
+                    Grid.Column="0" Grid.ColumnSpan="2"
+                    HeightRequest="1"
+                    VerticalOptions="Start"
+                    BackgroundColor="{StaticResource Divider}" />
+
+                <!-- Left: ME avatar + "You" + email
+                     flex items-center gap-2 -->
+                <Grid
+                    Grid.Column="0"
+                    ColumnDefinitions="Auto,*"
+                    ColumnSpacing="8"
+                    VerticalOptions="Center">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenProfileCommand}" />
+                    </Grid.GestureRecognizers>
+
+                    <!-- w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-violet-700
+                         flex items-center justify-center text-white text-xs font-semibold -->
+                    <Border
+                        Grid.Column="0"
+                        BackgroundColor="#8B5CF6"
+                        HeightRequest="32" WidthRequest="32"
+                        StrokeShape="RoundRectangle 16"
+                        Stroke="Transparent">
+                        <Grid>
+                            <Image
+                                Aspect="AspectFill"
+                                HeightRequest="32" WidthRequest="32"
+                                IsVisible="{Binding AvatarPath, Converter={StaticResource StringNotNullOrEmptyConverter}}"
+                                Source="{Binding AvatarPath}" />
+                            <Label
+                                FontAttributes="Bold" FontSize="11"
+                                IsVisible="{Binding AvatarPath, Converter={StaticResource StringIsNullOrEmptyConverter}}"
+                                Text="{Binding OwnEmail, Converter={StaticResource FirstLetterConverter}}"
+                                TextColor="White"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- text-sm text-gray-300 font-medium -->
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        Spacing="1"
+                        VerticalOptions="Center">
+                        <Label
+                            Text="You"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="#D1D5DB"
+                            LineBreakMode="TailTruncation" />
+                        <Label
+                            Text="{Binding OwnEmail}"
+                            FontSize="10"
+                            TextColor="{StaticResource TextMuted}"
+                            LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <!-- Right: 🌙 ⚙  p-2 rounded-xl text-gray-500 hover:text-purple-400 -->
+                <HorizontalStackLayout
+                    Grid.Column="1"
+                    Spacing="0"
+                    VerticalOptions="Center">
+                    <Button
+                        BackgroundColor="Transparent"
+                        Command="{Binding PickAvatarCommand}"
+                        Text="🌙" FontSize="16"
+                        TextColor="{StaticResource TextMuted}"
+                        HeightRequest="36" WidthRequest="36"
+                        CornerRadius="12" Padding="0" />
+                    <Button
+                        BackgroundColor="Transparent"
+                        Command="{Binding ToggleSettingsCommand}"
+                        Text="⚙" FontSize="16"
+                        TextColor="{StaticResource TextMuted}"
+                        HeightRequest="36" WidthRequest="36"
+                        CornerRadius="12" Padding="0" />
+                </HorizontalStackLayout>
+            </Grid>
+        </Grid>
+
+        <!-- ══ Settings backdrop ══ -->
+        <BoxView
+            x:Name="SettingsBackdrop"
+            AbsoluteLayout.LayoutBounds="0,0,1,1"
+            AbsoluteLayout.LayoutFlags="All"
+            BackgroundColor="#99000000"
+            Opacity="0"
+            IsVisible="False">
+            <BoxView.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CloseSettingsCommand}" />
+            </BoxView.GestureRecognizers>
+        </BoxView>
+
+        <!-- ══ Settings bottom sheet ══ -->
+        <Border
+            x:Name="SettingsSheet"
+            AbsoluteLayout.LayoutBounds="0.5,1,0.98,0.60"
+            AbsoluteLayout.LayoutFlags="All"
+            BackgroundColor="#0D0D0D"
+            IsVisible="False"
+            Padding="18,14"
+            Stroke="#1AFFFFFF"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 24,24,0,0">
+            <VerticalStackLayout Spacing="16">
+
+                <Border
+                    x:Name="SettingsHandle"
+                    BackgroundColor="#3A3A5A"
+                    HeightRequest="4" HorizontalOptions="Center"
+                    Stroke="Transparent" StrokeShape="RoundRectangle 2"
+                    WidthRequest="36">
+                    <Border.GestureRecognizers>
+                        <PanGestureRecognizer PanUpdated="OnSheetPanUpdated" />
+                    </Border.GestureRecognizers>
+                </Border>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label FontAttributes="Bold" FontSize="17" Text="Settings"
+                           TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
+                    <Button Grid.Column="1" BackgroundColor="#1AFFFFFF"
+                            Command="{Binding CloseSettingsCommand}"
+                            CornerRadius="14" HeightRequest="28" WidthRequest="28"
+                            Padding="0" Text="✕" FontSize="13"
+                            TextColor="{StaticResource TextMuted}" />
+                </Grid>
+
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout Spacing="8">
+                        <Button BackgroundColor="{StaticResource ContactRowActive}"
+                                Command="{Binding SelectSettingsTabCommand}"
+                                CommandParameter="profile"
+                                CornerRadius="10" Padding="14,8" FontSize="13"
+                                Text="Profile" TextColor="{StaticResource TextPrimary}" />
+                        <Button BackgroundColor="{StaticResource ContactRowActive}"
+                                Command="{Binding SelectSettingsTabCommand}"
+                                CommandParameter="wallpaper"
+                                CornerRadius="10" Padding="14,8" FontSize="13"
+                                Text="Wallpaper" TextColor="{StaticResource TextPrimary}" />
+                        <Button BackgroundColor="{StaticResource ContactRowActive}"
+                                Command="{Binding SelectSettingsTabCommand}"
+                                CommandParameter="notification"
+                                CornerRadius="10" Padding="14,8" FontSize="13"
+                                Text="Notifications" TextColor="{StaticResource TextPrimary}" />
+                        <Button BackgroundColor="Transparent"
+                                Command="{Binding LogoutCommand}"
+                                CornerRadius="10" Padding="14,8" FontSize="13"
+                                Text="Log out" TextColor="{StaticResource ErrorRed}" />
+                    </HorizontalStackLayout>
+                </ScrollView>
+
+                <!-- Profile tab -->
+                <VerticalStackLayout IsVisible="{Binding IsProfileTab}" Spacing="12">
+                    <HorizontalStackLayout Spacing="14" VerticalOptions="Center">
+                        <Border BackgroundColor="{StaticResource AccentPurple}"
+                                HeightRequest="52" WidthRequest="52"
+                                StrokeShape="RoundRectangle 26" Stroke="Transparent">
+                            <Image Aspect="AspectFill" HeightRequest="52" WidthRequest="52"
+                                   Source="{Binding AvatarPath}" />
+                        </Border>
+                        <Button BackgroundColor="{StaticResource ContactRowActive}"
+                                Command="{Binding PickAvatarCommand}"
+                                CornerRadius="10" HeightRequest="40" Padding="16,0"
+                                FontSize="13" Text="Change avatar"
+                                TextColor="{StaticResource TextPrimary}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Wallpaper tab -->
+                <VerticalStackLayout IsVisible="{Binding IsWallpaperTab}" Spacing="12">
+                    <Slider Maximum="0.35" Minimum="0.05"
+                            Value="{Binding WallpaperDimOpacity}"
+                            ThumbColor="{StaticResource AccentPurple}"
+                            MinimumTrackColor="{StaticResource AccentPurple}" />
+                    <CollectionView HeightRequest="100" ItemsLayout="HorizontalList"
+                                    ItemsSource="{Binding WallpaperOptions}"
+                                    ItemSizingStrategy="MeasureFirstItem" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="models:AssetOption">
+                                <Border BackgroundColor="{StaticResource SurfaceInput}"
+                                        Margin="0,0,8,0" Padding="5"
+                                        Stroke="{StaticResource Divider}"
+                                        StrokeShape="RoundRectangle 10" StrokeThickness="1">
+                                    <Border.Triggers>
+                                        <DataTrigger Binding="{Binding IsSelected}" TargetType="Border" Value="True">
+                                            <Setter Property="Stroke" Value="{StaticResource AccentPurple}" />
+                                            <Setter Property="StrokeThickness" Value="2" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <VerticalStackLayout Spacing="4" WidthRequest="80">
+                                        <Image Aspect="AspectFill" HeightRequest="50" WidthRequest="80"
+                                               IsVisible="{Binding PreviewPath, Converter={StaticResource StringNotNullOrEmptyConverter}}"
+                                               Source="{Binding PreviewPath}" />
+                                        <BoxView BackgroundColor="{StaticResource SurfaceInput}"
+                                                 HeightRequest="50" WidthRequest="80"
+                                                 IsVisible="{Binding PreviewPath, Converter={StaticResource StringIsNullOrEmptyConverter}}" />
+                                        <Label FontSize="9" HorizontalOptions="Center"
+                                               Text="{Binding Title}"
+                                               TextColor="{StaticResource TextMuted}" />
+                                    </VerticalStackLayout>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SetWallpaperImageCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <Button BackgroundColor="{StaticResource ContactRowActive}"
+                            Command="{Binding ClearWallpaperCommand}"
+                            CornerRadius="10" Padding="14,8" FontSize="12"
+                            HorizontalOptions="Start"
+                            Text="Reset wallpaper" TextColor="{StaticResource TextPrimary}" />
+                </VerticalStackLayout>
+
+                <!-- Notifications tab -->
+                <VerticalStackLayout IsVisible="{Binding IsNotificationTab}" Spacing="12">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Text="Badge theme" VerticalOptions="Center"
+                               TextColor="{StaticResource TextMuted}" FontSize="13" />
+                        <Picker Grid.Column="1" ItemsSource="{Binding BadgeThemes}"
+                                SelectedItem="{Binding BadgeTheme}"
+                                TextColor="{StaticResource TextPrimary}" />
+                    </Grid>
+                    <HorizontalStackLayout Spacing="8">
+                        <Button BackgroundColor="{StaticResource ContactRowActive}"
+                                Command="{Binding ClearNotificationGifCommand}"
+                                CornerRadius="10" Padding="12,8" FontSize="12"
+                                Text="Reset gif" TextColor="{StaticResource TextPrimary}" />
+                        <Button BackgroundColor="{StaticResource ContactRowActive}"
+                                Command="{Binding RecoverAssetsCommand}"
+                                CornerRadius="10" Padding="12,8" FontSize="12"
+                                Text="Restore" TextColor="{StaticResource TextPrimary}" />
+                        <Button BackgroundColor="{StaticResource ContactRowActive}"
+                                Command="{Binding ClearAssetCacheCommand}"
+                                CornerRadius="10" Padding="12,8" FontSize="12"
+                                Text="Cache" TextColor="{StaticResource TextPrimary}" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+
+    </AbsoluteLayout>
+</ContentPage>

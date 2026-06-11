@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!--  Pixel-perfect tokens from agon-agent index.css             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+
+    <!-- Backgrounds -->
+    <Color x:Key="AppBackground">#0A0A14</Color>       <!-- bg-[#0A0A14] chat body     -->
+    <Color x:Key="PanelBackground">#0D0D0D</Color>     <!-- bg-[#0D0D0D] sidebar/input -->
+    <Color x:Key="SurfaceInput">#1A1A2E</Color>        <!-- bg-[#1A1A2E] search/textarea-->
+    <Color x:Key="SurfacePeer">#1E1E2A</Color>         <!-- bg-[#1E1E2A] peer bubble    -->
+    <Color x:Key="SurfaceElevated">#16162A</Color>     <!-- sheets                      -->
+
+    <!-- Bubbles -->
+    <Color x:Key="BubbleMine">#7C3AED</Color>          <!-- gradient midpoint violet-700-->
+    <Color x:Key="BubblePeer">#1E1E2A</Color>          <!-- bg-[#1E1E2A]                -->
+
+    <!-- Borders: rgba(255,255,255,0.05) -->
+    <Color x:Key="Divider">#0DFFFFFF</Color>           <!-- border-white/5              -->
+    <Color x:Key="DividerLight">#1AFFFFFF</Color>      <!-- border-white/10             -->
+
+    <!-- Active row: bg-purple-600/20, border-purple-500/30 -->
+    <Color x:Key="ContactRowActive">#338B5CF6</Color>
+    <Color x:Key="ContactRowActiveBorder">#4D8B5CF6</Color>
+
+    <!-- Avatar gradient midpoints (5 palettes from Avatar.tsx) -->
+    <!-- 0: from-violet-500 #8B5CF6 to-purple-700 #7E22CE -->
+    <!-- 1: from-fuchsia-500 #D946EF to-pink-700 #BE185D  -->
+    <!-- 2: from-indigo-500 #6366F1 to-blue-700 #1D4ED8   -->
+    <!-- 3: from-purple-500 #A855F7 to-violet-800 #5B21B6 -->
+    <!-- 4: from-rose-500 #F43F5E to-red-700 #B91C1C      -->
+    <!-- Used by EmailToAvatarColorConverter -->
+
+    <!-- Text -->
+    <Color x:Key="TextPrimary">#FFFFFF</Color>
+    <Color x:Key="TextSecondary">#9CA3AF</Color>       <!-- gray-400                    -->
+    <Color x:Key="TextMuted">#6B7280</Color>           <!-- gray-500                    -->
+    <Color x:Key="TextPurple200">#DDD6FE</Color>       <!-- purple-200 active name      -->
+    <Color x:Key="TextEmerald">#34D399</Color>         <!-- emerald-400 online          -->
+    <Color x:Key="TextTimestampMine">#B3C4B5FD</Color> <!-- purple-200/70               -->
+
+    <!-- Accents -->
+    <Color x:Key="AccentPurple">#8B5CF6</Color>        <!-- purple-600                  -->
+    <Color x:Key="AccentViolet">#7C3AED</Color>        <!-- violet-600/700              -->
+    <Color x:Key="AccentYellow">#8B5CF6</Color>        <!-- maps to purple              -->
+    <Color x:Key="OnlineGreen">#34D399</Color>         <!-- emerald-400                 -->
+    <Color x:Key="OfflineGray">#6B7280</Color>         <!-- gray-500                    -->
+    <Color x:Key="ErrorRed">#F87171</Color>
+
+    <!-- Unread badge -->
+    <Color x:Key="BadgePurple">#8B5CF6</Color>
+
+    <!-- Send button shadow: shadow-purple-900/30 -->
+    <Color x:Key="ShadowPurple">#4D3C1A6B</Color>
+
+    <!-- MAUI internals -->
+    <Color x:Key="Primary">#8B5CF6</Color>
+    <Color x:Key="PrimaryDark">#7C3AED</Color>
+    <Color x:Key="PrimaryDarkText">#0A0A14</Color>
+    <Color x:Key="Secondary">#C4B5FD</Color>
+    <Color x:Key="SecondaryDarkText">#7C3AED</Color>
+    <Color x:Key="Tertiary">#6D28D9</Color>
+    <Color x:Key="White">White</Color>
+    <Color x:Key="Black">Black</Color>
+    <Color x:Key="Magenta">#D946EF</Color>
+    <Color x:Key="MidnightBlue">#0A0A14</Color>
+    <Color x:Key="OffBlack">#0D0D0D</Color>
+    <Color x:Key="Gray100">#F3F4F6</Color>
+    <Color x:Key="Gray200">#E5E7EB</Color>
+    <Color x:Key="Gray300">#D1D5DB</Color>
+    <Color x:Key="Gray400">#9CA3AF</Color>
+    <Color x:Key="Gray500">#6B7280</Color>
+    <Color x:Key="Gray600">#4B5563</Color>
+    <Color x:Key="Gray900">#111827</Color>
+    <Color x:Key="Gray950">#030712</Color>
+
+    <SolidColorBrush x:Key="PrimaryBrush"     Color="{StaticResource Primary}"/>
+    <SolidColorBrush x:Key="SecondaryBrush"   Color="{StaticResource Secondary}"/>
+    <SolidColorBrush x:Key="TertiaryBrush"    Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="WhiteBrush"       Color="{StaticResource White}"/>
+    <SolidColorBrush x:Key="BlackBrush"       Color="{StaticResource Black}"/>
+    <SolidColorBrush x:Key="Gray100Brush"     Color="{StaticResource Gray100}"/>
+    <SolidColorBrush x:Key="Gray200Brush"     Color="{StaticResource Gray200}"/>
+    <SolidColorBrush x:Key="Gray300Brush"     Color="{StaticResource Gray300}"/>
+    <SolidColorBrush x:Key="Gray400Brush"     Color="{StaticResource Gray400}"/>
+    <SolidColorBrush x:Key="Gray500Brush"     Color="{StaticResource Gray500}"/>
+    <SolidColorBrush x:Key="Gray600Brush"     Color="{StaticResource Gray600}"/>
+    <SolidColorBrush x:Key="Gray900Brush"     Color="{StaticResource Gray900}"/>
+    <SolidColorBrush x:Key="Gray950Brush"     Color="{StaticResource Gray950}"/>
+</ResourceDictionary>

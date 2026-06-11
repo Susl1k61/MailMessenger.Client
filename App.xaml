@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:MailMessenger.Client.Converters"
+             x:Class="MailMessenger.Client.App"
+             UserAppTheme="Dark">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- ── Merged dictionaries first (tokens must load before converters use them) ── -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- ── Converters ─────────────────────────────────────────────── -->
+            <converters:StringNotNullOrEmptyConverter x:Key="StringNotNullOrEmptyConverter" />
+            <converters:StringIsNullOrEmptyConverter  x:Key="StringIsNullOrEmptyConverter" />
+            <converters:FirstLetterConverter          x:Key="FirstLetterConverter" />
+            <converters:InvertedBoolConverter         x:Key="InvertedBoolConverter" />
+            <converters:BoolToLayoutOptionsConverter  x:Key="BoolToLayoutOptionsConverter" />
+            <converters:BoolToBubbleColorConverter    x:Key="BoolToBubbleColorConverter" />
+            <converters:BoolToBubbleBorderConverter   x:Key="BoolToBubbleBorderConverter" />
+            <converters:BoolToTimestampColorConverter x:Key="BoolToTimestampColorConverter" />
+            <converters:BoolToImapStatusColorConverter x:Key="BoolToImapStatusColorConverter" />
+            <converters:UtcToLocalTimeConverter       x:Key="UtcToLocalTimeConverter" />
+            <converters:DateTimeToChatListTimeConverter x:Key="DateTimeToChatListTimeConverter" />
+            <converters:WallpaperKeyToColorConverter  x:Key="WallpaperKeyToColorConverter" />
+            <converters:UnreadCountToVisibleConverter x:Key="UnreadCountToVisibleConverter" />
+            <converters:UnreadCountToTextConverter    x:Key="UnreadCountToTextConverter" />
+            <converters:UnreadCountToNumberVisibleConverter x:Key="UnreadCountToNumberVisibleConverter" />
+            <converters:UnreadCountToFlameVisibleConverter  x:Key="UnreadCountToFlameVisibleConverter" />
+            <converters:UnreadCountToFlameGifVisibleConverter   x:Key="UnreadCountToFlameGifVisibleConverter" />
+            <converters:UnreadCountToFlameEmojiVisibleConverter x:Key="UnreadCountToFlameEmojiVisibleConverter" />
+            <converters:BadgeThemeToColorConverter    x:Key="BadgeThemeToColorConverter" />
+            <converters:EmailToAvatarColorConverter   x:Key="EmailToAvatarColorConverter" />
+            <converters:IndexToAvatarColorConverter   x:Key="IndexToAvatarColorConverter" />
+            <converters:BoolToConnectionStatusColorConverter x:Key="BoolToConnectionStatusColorConverter" />
+            <converters:BoolToSearchIconColorConverter       x:Key="BoolToSearchIconColorConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

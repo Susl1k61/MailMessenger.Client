@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  MainSplitPage — master/detail layout.
+  On narrow screens (phones) this page is transparent — the normal
+  Shell navigation pushes ChatPage on top.
+  On wide screens (iPad / desktop, ≥ 600 dp) a 380 dp sidebar stays
+  permanently on the left and the chat area fills the rest.
+-->
+<ContentPage
+    x:Class="MailMessenger.Client.Views.MainSplitPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:views="clr-namespace:MailMessenger.Client.Views"
+    BackgroundColor="{StaticResource AppBackground}"
+    Shell.NavBarIsVisible="False">
+
+    <Grid x:Name="RootGrid" ColumnDefinitions="Auto,*">
+
+        <!-- ── Left sidebar (always visible on wide screens) ── -->
+        <Grid
+            x:Name="SidebarColumn"
+            Grid.Column="0"
+            WidthRequest="380"
+            IsVisible="False"
+            BackgroundColor="{StaticResource PanelBackground}">
+            <!-- ContactsPage content injected at runtime from code-behind -->
+        </Grid>
+
+        <!-- Vertical divider -->
+        <BoxView
+            x:Name="SidebarDivider"
+            Grid.Column="0"
+            WidthRequest="1"
+            HorizontalOptions="End"
+            BackgroundColor="{StaticResource Divider}"
+            IsVisible="False"
+            InputTransparent="True"
+            ZIndex="5" />
+
+        <!-- ── Right / main chat area ── -->
+        <Grid Grid.Column="1" x:Name="ChatColumn"
+              BackgroundColor="{StaticResource AppBackground}">
+            <!-- placeholder shown when no chat is selected on wide screens -->
+            <VerticalStackLayout
+                x:Name="NoChatPlaceholder"
+                Spacing="12" Padding="40"
+                VerticalOptions="Center" HorizontalOptions="Center"
+                IsVisible="False">
+                <Border BackgroundColor="#198B5CF6"
+                        HeightRequest="80" WidthRequest="80"
+                        HorizontalOptions="Center"
+                        StrokeShape="RoundRectangle 40"
+                        Stroke="Transparent">
+                    <Label Text="💬" FontSize="40"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Label Text="Select a conversation"
+                       FontSize="18" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalOptions="Center" />
+                <Label Text="Choose a chat from the left to start messaging"
+                       FontSize="13" TextColor="{StaticResource TextMuted}"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+    </Grid>
+</ContentPage>

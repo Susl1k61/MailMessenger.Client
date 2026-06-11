@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="MailMessenger.Client.Views.ChatPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:MailMessenger.Client.Models"
+    BackgroundColor="{StaticResource AppBackground}"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto,Auto"
+          BackgroundColor="{StaticResource AppBackground}">
+
+        <!-- Wallpaper layer -->
+        <Image
+            Grid.Row="0" Grid.RowSpan="5"
+            Aspect="AspectFill"
+            Opacity="{Binding WallpaperDimOpacity}"
+            Source="{Binding WallpaperImagePath}"
+            InputTransparent="True"
+            IsVisible="{Binding WallpaperImagePath, Converter={StaticResource StringNotNullOrEmptyConverter}}" />
+
+        <!-- ══ HEADER ══ -->
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="Auto,*,Auto"
+            ColumnSpacing="0"
+            Padding="10,44,10,10"
+            BackgroundColor="{StaticResource PanelBackground}">
+
+            <!-- bottom border -->
+            <BoxView
+                Grid.Column="0" Grid.ColumnSpan="3"
+                HeightRequest="1" VerticalOptions="End"
+                BackgroundColor="{StaticResource Divider}"
+                InputTransparent="True" />
+
+            <!-- Left: ← + avatar + name/status -->
+            <HorizontalStackLayout
+                Grid.Column="0"
+                Spacing="12"
+                VerticalOptions="Center">
+
+                <!-- ← Back -->
+                <Button
+                    BackgroundColor="Transparent"
+                    Command="{Binding GoBackCommand}"
+                    Text="←" FontSize="20"
+                    TextColor="{StaticResource TextSecondary}"
+                    HeightRequest="36" WidthRequest="36"
+                    CornerRadius="10" Padding="0" />
+
+                <!-- Avatar -->
+                <Border
+                    HeightRequest="48" WidthRequest="48"
+                    StrokeShape="RoundRectangle 24"
+                    Stroke="Transparent"
+                    BackgroundColor="{Binding PeerEmail, Converter={StaticResource EmailToAvatarColorConverter}}">
+                    <Label
+                        Text="{Binding PeerNickname, Converter={StaticResource FirstLetterConverter}}"
+                        FontAttributes="Bold" FontSize="16"
+                        HorizontalOptions="Center" VerticalOptions="Center"
+                        TextColor="White" />
+                </Border>
+
+                <!-- Name + real connection status -->
+                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                    <Label
+                        Text="{Binding PeerNickname}"
+                        FontAttributes="Bold" FontSize="14"
+                        TextColor="{StaticResource TextPrimary}"
+                        LineBreakMode="TailTruncation" />
+                    <!-- green when connected, gray when offline -->
+                    <Label
+                        Text="{Binding ConnectionStatus}"
+                        FontSize="12"
+                        TextColor="{Binding IsConnected, Converter={StaticResource BoolToConnectionStatusColorConverter}}" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+
+            <!-- Right: 🔍 Search toggle + ⋮ More -->
+            <HorizontalStackLayout
+                Grid.Column="2"
+                Spacing="0"
+                VerticalOptions="Center">
+
+                <!-- 🔍 Search toggle -->
+                <Button
+                    BackgroundColor="Transparent"
+                    Command="{Binding ToggleSearchCommand}"
+                    Text="🔍" FontSize="18"
+                    TextColor="{Binding IsSearchVisible, Converter={StaticResource BoolToSearchIconColorConverter}}"
+                    HeightRequest="40" WidthRequest="40"
+                    CornerRadius="12" Padding="0" />
+
+                <!-- ⋮ More -->
+                <Button
+                    BackgroundColor="Transparent"
+                    Command="{Binding ShowMoreMenuCommand}"
+                    Text="⋮" FontSize="22"
+                    TextColor="{StaticResource TextSecondary}"
+                    HeightRequest="40" WidthRequest="40"
+                    CornerRadius="12" Padding="0" />
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- ══ SEARCH BAR (visible only when IsSearchVisible) ══ -->
+        <Grid
+            Grid.Row="1"
+            IsVisible="{Binding IsSearchVisible}"
+            Padding="12,6,12,6"
+            BackgroundColor="{StaticResource PanelBackground}"
+            PropertyChanged="OnSearchBarPropertyChanged">
+            <Border
+                BackgroundColor="{StaticResource SurfaceInput}"
+                Padding="12,0,8,0"
+                Stroke="{StaticResource Divider}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 12"
+                HeightRequest="44">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                    <Label Grid.Column="0" Text="🔍" FontSize="14"
+                           TextColor="{StaticResource TextMuted}"
+                           VerticalOptions="Center" Opacity="0.7" />
+                    <Entry
+                        x:Name="SearchEntry"
+                        Grid.Column="1"
+                        BackgroundColor="Transparent"
+                        PlaceholderColor="{StaticResource TextMuted}"
+                        TextColor="{StaticResource TextPrimary}"
+                        Placeholder="Search in messages…"
+                        Text="{Binding SearchQuery}"
+                        FontSize="14" />
+                    <Button
+                        Grid.Column="2"
+                        BackgroundColor="Transparent"
+                        Command="{Binding ToggleSearchCommand}"
+                        Text="✕" FontSize="14"
+                        TextColor="{StaticResource TextMuted}"
+                        HeightRequest="32" WidthRequest="32"
+                        CornerRadius="8" Padding="0" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- ══ MESSAGES (shows FilteredMessages so search works) ══ -->
+        <CollectionView
+            x:Name="MessagesView"
+            Grid.Row="2"
+            Margin="0,4,0,0"
+            ItemsSource="{Binding FilteredMessages}"
+            ItemsUpdatingScrollMode="KeepLastItemInView"
+            SelectionMode="None"
+            VerticalScrollBarVisibility="Never">
+
+            <CollectionView.Header>
+                <Grid Padding="16,12,16,12">
+                    <Border
+                        BackgroundColor="{StaticResource Divider}"
+                        Padding="12,4"
+                        HorizontalOptions="Center"
+                        Stroke="{StaticResource Divider}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12">
+                        <Label Text="Today" FontSize="11"
+                               TextColor="{StaticResource TextSecondary}"
+                               HorizontalOptions="Center" />
+                    </Border>
+                </Grid>
+            </CollectionView.Header>
+
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Spacing="10" Padding="40"
+                                     VerticalOptions="Center" HorizontalOptions="Center">
+                    <Border BackgroundColor="{StaticResource ContactRowActive}"
+                            HeightRequest="72" WidthRequest="72"
+                            HorizontalOptions="Center"
+                            StrokeShape="RoundRectangle 36" Stroke="Transparent">
+                        <Label Text="💬" FontSize="36"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <Label Text="No messages yet" FontSize="15" FontAttributes="Bold"
+                           TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center" />
+                    <Label Text="Start the conversation!" FontSize="13"
+                           TextColor="{StaticResource TextMuted}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:ChatMessage">
+                    <SwipeView>
+                        <SwipeView.RightItems>
+                            <SwipeItems Mode="Execute">
+                                <SwipeItem
+                                    BackgroundColor="{StaticResource ErrorRed}"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteMessageCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Text="Delete" />
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+
+                        <Grid Padding="16,3">
+                            <Border
+                                Padding="16,10,16,8"
+                                HorizontalOptions="{Binding IsMine, Converter={StaticResource BoolToLayoutOptionsConverter}}"
+                                MaximumWidthRequest="285"
+                                Stroke="{Binding IsMine, Converter={StaticResource BoolToBubbleBorderConverter}}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 18"
+                                BackgroundColor="{Binding IsMine, Converter={StaticResource BoolToBubbleColorConverter}}">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label
+                                        LineBreakMode="WordWrap"
+                                        Text="{Binding Text}"
+                                        TextColor="#F3F4F6"
+                                        FontSize="14" />
+                                    <HorizontalStackLayout HorizontalOptions="End" Spacing="2">
+                                        <Label
+                                            FontSize="10"
+                                            Text="{Binding SentAt, Converter={StaticResource UtcToLocalTimeConverter}}"
+                                            TextColor="{Binding IsMine, Converter={StaticResource BoolToTimestampColorConverter}}"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            IsVisible="{Binding IsMine}"
+                                            FontSize="11" Text="✓✓"
+                                            TextColor="#C4B5FD"
+                                            VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </Grid>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Error banner -->
+        <Border
+            Grid.Row="2"
+            VerticalOptions="Start" HorizontalOptions="Fill"
+            IsVisible="{Binding ErrorMessage, Converter={StaticResource StringNotNullOrEmptyConverter}}"
+            BackgroundColor="#CC0D0D0D" Padding="14,8"
+            Stroke="Transparent" StrokeShape="RoundRectangle 0">
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="{StaticResource ErrorRed}"
+                   LineBreakMode="WordWrap" FontSize="13" />
+        </Border>
+
+        <!-- ══ EMOJI / STICKER PANEL ══ -->
+        <Border
+            Grid.Row="3"
+            IsVisible="{Binding IsEmojiPanelVisible}"
+            BackgroundColor="{StaticResource PanelBackground}"
+            Stroke="{StaticResource Divider}" StrokeThickness="1"
+            StrokeShape="RoundRectangle 0"
+            HeightRequest="300" Padding="0">
+            <WebView
+                x:Name="EmojiWebView"
+                BackgroundColor="Transparent"
+                Navigating="OnEmojiWebViewNavigating"
+                Navigated="OnEmojiWebViewNavigated">
+                <WebView.Source>
+                    <HtmlWebViewSource Html="{Binding EmojiPanelHtml}" />
+                </WebView.Source>
+            </WebView>
+        </Border>
+
+        <!-- ══ INPUT BAR ══ -->
+        <Grid
+            Grid.Row="4"
+            ColumnDefinitions="Auto,*,Auto"
+            ColumnSpacing="8"
+            Padding="16,10,16,32"
+            BackgroundColor="{StaticResource PanelBackground}">
+
+            <BoxView
+                Grid.Column="0" Grid.ColumnSpan="3"
+                HeightRequest="1" VerticalOptions="Start"
+                BackgroundColor="{StaticResource Divider}"
+                InputTransparent="True" />
+
+            <!-- 📎 Attach -->
+            <Button
+                Grid.Column="0"
+                BackgroundColor="Transparent"
+                Command="{Binding PickAttachmentsCommand}"
+                Text="📎" FontSize="20"
+                TextColor="{StaticResource TextSecondary}"
+                HeightRequest="44" WidthRequest="44"
+                CornerRadius="12" Padding="0" />
+
+            <!-- Input pill -->
+            <Border
+                Grid.Column="1"
+                BackgroundColor="{StaticResource SurfaceInput}"
+                Padding="16,0,6,0"
+                Stroke="{StaticResource Divider}"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 22"
+                HeightRequest="50"
+                VerticalOptions="Center">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="2">
+                    <Entry
+                        x:Name="MessageEntry"
+                        BackgroundColor="Transparent"
+                        PlaceholderColor="{StaticResource TextMuted}"
+                        TextColor="{StaticResource TextPrimary}"
+                        Placeholder="Write a message..."
+                        ReturnCommand="{Binding SendMessageCommand}"
+                        Text="{Binding MessageText}"
+                        VerticalOptions="Center"
+                        FontSize="14" />
+                    <Button
+                        Grid.Column="1"
+                        BackgroundColor="Transparent"
+                        Command="{Binding ToggleEmojiPanelCommand}"
+                        Text="☺" FontSize="19"
+                        TextColor="{StaticResource TextSecondary}"
+                        HeightRequest="36" WidthRequest="36"
+                        CornerRadius="10" Padding="0" />
+                </Grid>
+            </Border>
+
+            <!-- Send button -->
+            <Border
+                Grid.Column="2"
+                BackgroundColor="{StaticResource AccentPurple}"
+                HeightRequest="50" WidthRequest="50"
+                StrokeShape="RoundRectangle 14"
+                Stroke="Transparent">
+                <Button
+                    BackgroundColor="Transparent"
+                    Command="{Binding SendMessageCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InvertedBoolConverter}}"
+                    Text="➤" FontSize="18"
+                    TextColor="White"
+                    HeightRequest="50" WidthRequest="50"
+                    CornerRadius="14" Padding="0,0,2,0" />
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>
